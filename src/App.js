@@ -1,4 +1,4 @@
-import { useState, Component } from 'react';
+import { useEffect, useState, Component } from 'react';
 import Select from "react-select";
 import { FixedSizeList as List } from "react-window";
 import cities from './assets/cities-fr.json';
@@ -28,10 +28,12 @@ class MenuList extends Component {
 
 function App() {
 
-  
   const [currentCity, setCurrentCity] = useState(cities[0]);
+  const [currentCityWeather, setCurrentCityWeather] = useState();
+  const [forcastCityWeather, setForcastCityWeather] = useState();
 
-  let customStyles = {
+  const dayName = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const customStyles = {
     option: provided => ({
       ...provided,
       color: 'black'
@@ -42,8 +44,30 @@ function App() {
     })
   }
 
+  useEffect(() => {
+    const request = new Request(`https://api.openweathermap.org/data/2.5/weather?lat=${currentCity.lat}&lon=${currentCity.lon}&appid=ef1093f4880131e9dfc0391a2c18f91a&units=metric`);
+    fetch(request)
+      .then(response => response.json())
+      .then(data => {
+        setCurrentCityWeather(data);
+      });
+  }, [currentCity]);
+
+  useEffect(() => {
+    const request = new Request(`https://api.openweathermap.org/data/2.5/onecall?lat=${currentCity.lat}&lon=${currentCity.lon}&units=metric&exclude=current,minutely,hourly,alerts&appid=ef1093f4880131e9dfc0391a2c18f91a`);
+    fetch(request)
+      .then(response => response.json())
+      .then(data => {
+        setForcastCityWeather(data.daily.slice(1, 4));
+      });
+  }, [currentCity]);
+
   const selectedCity = (city) => {
     setCurrentCity(city);
+  }
+
+  const formatDay = (index) => {
+    return index || index === 0 ? dayName[new Date().getDay() + index].toLocaleUpperCase() : '-';
   }
 
   return (
@@ -59,6 +83,43 @@ function App() {
             getOptionValue={(option) => option}
             options={cities} />
         </div>
+      </div>
+      <div className='app__weather'>
+        <div className='app__weather__header'>
+          <span className='app__weather__header__card'>
+            {currentCity?.nm?.toLocaleUpperCase()}
+          </span>
+        </div>
+        <div className='app__weather__card'>
+          <div>
+            <span className={`wi ${'wi-icon-' + currentCityWeather?.weather[0]?.id}`}></span>
+          </div>
+          <div>
+            {currentCityWeather?.main?.temp}&deg;
+          </div>
+        </div>
+      </div>
+      <div className='app__weather__header'>
+        {forcastCityWeather?.map((forcastData, index) =>
+          <span key={forcastData?.dt} className='app__weather__header__card'>
+            {formatDay(index)}
+          </span>
+        )}
+      </div>
+      <div className='app__forcast'>
+        {forcastCityWeather?.map((forcastData) =>
+          <div key={forcastData?.dt} className='app__forcast__card'>
+            <div>
+              <span className={`wi ${'wi-icon-' + forcastData?.weather[0]?.id}`}></span>
+            </div>
+            <div>
+              {forcastData?.temp?.max}&deg;
+            </div>
+            <div>
+              {forcastData?.temp?.min}&deg;
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

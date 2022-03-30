@@ -9,3 +9,35 @@
 .app__select {
   min-width: 20rem;
 }
+.app__forcast {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.app__forcast__card {
+  margin: 0.5rem;
+  padding: 0.2rem 1rem;
+}
+.app__forcast__card div {
+  text-align: center;
+  font-size: 1rem;
+}
+.app__weather {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.app__weather__header {
+  text-align: center;
+  padding: 0.2rem 1rem;
+  margin: 0.2rem;
+  background-color: #9161BB;
+}
+.app__weather__card div{
+  text-align: center;
+  font-size: 2rem;
+}
+.app__weather__header__card {
+  margin: 1rem;
+  padding: 0.2rem 1rem;
+}
