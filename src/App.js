@@ -31,6 +31,10 @@ function App() {
   const [currentCity, setCurrentCity] = useState(cities[0]);
   const [currentCityWeather, setCurrentCityWeather] = useState();
   const [forcastCityWeather, setForcastCityWeather] = useState();
+  const [loader, setLoader] = useState({
+    current: true,
+    forecast: true
+  })
 
   const dayName = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const customStyles = {
@@ -45,20 +49,32 @@ function App() {
   }
 
   useEffect(() => {
+    setLoader((prev) => {
+      return {...prev, current:true}
+    })
     const request = new Request(`https://api.openweathermap.org/data/2.5/weather?lat=${currentCity.lat}&lon=${currentCity.lon}&appid=ef1093f4880131e9dfc0391a2c18f91a&units=metric`);
     fetch(request)
       .then(response => response.json())
       .then(data => {
         setCurrentCityWeather(data);
+        setLoader((prev) => {
+          return {...prev, current:false}
+        })
       });
   }, [currentCity]);
 
   useEffect(() => {
+    setLoader((prev) => {
+      return {...prev, forecast:true}
+    })
     const request = new Request(`https://api.openweathermap.org/data/2.5/onecall?lat=${currentCity.lat}&lon=${currentCity.lon}&units=metric&exclude=current,minutely,hourly,alerts&appid=ef1093f4880131e9dfc0391a2c18f91a`);
     fetch(request)
       .then(response => response.json())
       .then(data => {
         setForcastCityWeather(data.daily.slice(1, 4));
+        setLoader((prev) => {
+          return {...prev, forecast:false}
+        })
       });
   }, [currentCity]);
 
@@ -90,14 +106,17 @@ function App() {
             {currentCity?.nm?.toLocaleUpperCase()}
           </span>
         </div>
-        <div className='app__weather__card'>
+        {loader.current && <div className='app__weather__card__loader'>
+          <div className="loader"></div>
+        </div>}
+        {!loader.current &&<div className='app__weather__card'>
           <div>
             <span className={`wi ${'wi-icon-' + currentCityWeather?.weather[0]?.id}`}></span>
           </div>
           <div>
             {currentCityWeather?.main?.temp}&deg;
           </div>
-        </div>
+        </div>}
       </div>
       <div className='app__weather__header'>
         {forcastCityWeather?.map((forcastData, index) =>
@@ -107,7 +126,10 @@ function App() {
         )}
       </div>
       <div className='app__forcast'>
-        {forcastCityWeather?.map((forcastData) =>
+        {loader.forecast && <div className='app__weather__card__loader'>
+          <div className="loader"></div>
+        </div>}
+        {!loader.forecast && forcastCityWeather?.map((forcastData) =>
           <div key={forcastData?.dt} className='app__forcast__card'>
             <div>
               <span className={`wi ${'wi-icon-' + forcastData?.weather[0]?.id}`}></span>
