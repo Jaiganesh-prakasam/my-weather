@@ -1,1 +1,11 @@
 @import './styles/weathericons.css';
+
+.app__header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.app__select {
+  min-width: 20rem;
+}
